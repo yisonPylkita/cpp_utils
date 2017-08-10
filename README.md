@@ -1,2 +1,4 @@
-# std_n
-Modern C++ standard library
+# cpp_utils
+
+Useful C++ utils
+
