@@ -1,8 +1,8 @@
 #include <Windows.h>
-#include <pro_utils/Exceptions.h>
-#include <pro_utils/win32/Errors.hpp>
+#include <cpp_utils/Exceptions.h>
+#include <cpp_utils/win32/Errors.hpp>
 
-namespace pro_utils {
+namespace cpp_utils {
 namespace win32 {
 std::wstring GetLastErrorMessage()
 {

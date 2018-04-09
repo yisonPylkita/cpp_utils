@@ -1,9 +1,9 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
-#include <pro_utils/string.hpp>
+#include <cpp_utils/string.hpp>
 
-namespace pro_utils {
+namespace cpp_utils {
 namespace string {
 string to_lower(const string &str)
 {

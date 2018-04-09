@@ -1,8 +1,8 @@
-#include <test/Catch.hpp>
-#include <pro_utils/string.hpp>
+#include "Catch.hpp"
+#include <cpp_utils/string.hpp>
 
-namespace str = pro_utils::string;
-using pro_utils::string::string;
+namespace str = cpp_utils::string;
+using cpp_utils::string::string;
 
 TEST_CASE("One letter to_lower()", "[string]")
 {

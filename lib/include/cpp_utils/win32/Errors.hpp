@@ -5,7 +5,7 @@
 #pragma once
 #include <string>
 
-namespace pro_utils {
+namespace cpp_utils {
 namespace win32 {
 /// <summary>
 /// Get last Windows error message

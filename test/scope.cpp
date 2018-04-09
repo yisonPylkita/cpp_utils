@@ -1,6 +1,6 @@
-#include <test/Catch.hpp>
 #include <functional>
-#include <pro_utils/scope.hpp>
+#include "Catch.hpp"
+#include <cpp_utils/scope.hpp>
 
 class ScopeLeaveFixture {
 public:

@@ -1,7 +1,7 @@
-#include <test/Catch.hpp>
 #include <string>
 #include <vector>
-#include <pro_utils/preprocessor.hpp>
+#include "Catch.hpp"
+#include <cpp_utils/preprocessor.hpp>
 
 TEST_CASE("There can be multiple unique variables in one scope", "[preprocessor]")
 {

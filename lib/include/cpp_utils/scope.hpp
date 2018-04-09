@@ -80,5 +80,6 @@ public:
 private:
     callback _on_destroy;
 };
+}
 
 #define on_scope_leave(callback) on_scope_leave_impl::on_scope_leave_class UNIQUE(callback)
