@@ -1,6 +1,5 @@
 project(cpp_utils_lib)
 
-
 set(LIB_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_utils/bytes.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cpp_utils/preprocessor.hpp
