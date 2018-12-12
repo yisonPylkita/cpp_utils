@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <algorithm>
 
 
 // TODO: wrap this in namespace
@@ -10,14 +11,14 @@
 namespace vec {
 namespace operators {
 template <typename T>
-typename std::vector<T>  operator+(std::vector<T> &&lhs, T &&rhs)
+inline typename std::vector<T>  operator+(std::vector<T> &&lhs, T &&rhs)
 {
     lhs.emplace_back(rhs);
     return lhs;
 }
 
 template <typename T>
-typename std::vector<T>  operator+(const std::vector<T> &lhs, const T &rhs)
+inline typename std::vector<T>  operator+(const std::vector<T> &lhs, const T &rhs)
 {
     std::vector<T> result(lhs);
     result.push_back(rhs);
@@ -25,7 +26,7 @@ typename std::vector<T>  operator+(const std::vector<T> &lhs, const T &rhs)
 }
 
 template <typename T>
-typename std::vector<T>  operator+(std::vector<T> &&lhs, std::vector<T> &&rhs)
+inline typename std::vector<T>  operator+(std::vector<T> &&lhs, std::vector<T> &&rhs)
 {
     std::vector<T> result;
     for (const auto &entry : lhs)
@@ -36,7 +37,37 @@ typename std::vector<T>  operator+(std::vector<T> &&lhs, std::vector<T> &&rhs)
 }
 
 template <typename T>
-typename std::vector<T>  operator+(const std::vector<T> &lhs, const std::vector<T> &rhs)
+inline typename std::vector<T>  operator+(const std::vector<T> &lhs, const std::vector<T> &rhs)
+{
+    std::vector<T> result;
+    for (const auto &entry : lhs)
+        result.push_back(entry);
+    for (const auto &entry : rhs)
+        result.push_back(entry);
+    return result;
+}
+
+// TODO: WARNING: error prone - you may accidentally convert array to vector
+// TODO: and while array.size() is the same as array.capacity you will find
+// TODO: yourself with hard-to-find bug. Instead convert array to vector using vec::to_vector()
+//template <typename T, std::size_t Size>
+//typename std::vector<T>  operator+(const std::array<T, Size> &lhs, const std::vector<T> &rhs)
+//{
+//    if (lhs.empty())
+//        return {};
+//    return std::vector<T>{&lhs[0], &lhs[0] + lhs.size()} + rhs;
+//}
+//
+//template <typename T, std::size_t Size>
+//typename std::vector<T>  operator+(const std::vector<T> &lhs, const std::array<T, Size> &rhs)
+//{
+//    if (lhs.empty())
+//        return {};
+//    return lhs + std::vector<T>{&rhs[0], &rhs[0] + rhs.size()};
+//}
+
+template <typename T, std::size_t ArraySize>
+inline typename std::vector<T>  operator+(std::vector<T> &&lhs, std::array<T, ArraySize> &&rhs)
 {
     std::vector<T> result;
     for (const auto &entry : lhs)
@@ -47,18 +78,7 @@ typename std::vector<T>  operator+(const std::vector<T> &lhs, const std::vector<
 }
 
 template <typename T, std::size_t ArraySize>
-typename std::vector<T>  operator+(std::vector<T> &&lhs, std::array<T, ArraySize> &&rhs)
-{
-    std::vector<T> result;
-    for (const auto &entry : lhs)
-        result.push_back(entry);
-    for (const auto &entry : rhs)
-        result.push_back(entry);
-    return result;
-}
-
-template <typename T, std::size_t ArraySize>
-typename std::vector<T>  operator+(std::vector<T> &lhs, const std::array<T, ArraySize> &rhs)
+inline typename std::vector<T>  operator+(std::vector<T> &lhs, const std::array<T, ArraySize> &rhs)
 {
     std::vector<T> result;
     for (const auto &entry : lhs)
@@ -69,30 +89,30 @@ typename std::vector<T>  operator+(std::vector<T> &lhs, const std::array<T, Arra
 }
 
 template <typename T>
-typename std::vector<T>  operator+=(std::vector<T> &lhs, const T &rhs)
+inline typename std::vector<T>  operator+=(std::vector<T> &lhs, const T &rhs)
 {
     lhs.push_back(rhs);
     return lhs;
 }
 
 template <typename T>
-typename std::vector<T>  operator+=(std::vector<T> &lhs, const std::vector<T> &rhs)
+inline typename std::vector<T>  operator+=(std::vector<T> &lhs, const std::vector<T> &rhs)
 {
     for (const auto &entry : rhs)
         lhs.push_back(entry);
     return lhs;
 }
 
-template <typename T, std::size_t ArraySize>
-typename std::vector<T>  operator+=(std::vector<T> &lhs, const std::array<T, ArraySize> &rhs)
+template <typename T, std::size_t Size>
+inline typename std::vector<T>  operator+=(std::vector<T> &lhs, const std::array<T, Size> &rhs)
 {
     for (const auto &entry : rhs)
         lhs.push_back(entry);
     return lhs;
 }
 
-template <typename T, std::size_t ArraySize>
-bool  operator==(const std::vector<T> &lhs, const std::array<T, ArraySize> &rhs)
+template <typename T, std::size_t Size>
+inline bool  operator==(const std::vector<T> &lhs, const std::array<T, Size> &rhs)
 {
     if (lhs.size() != rhs.size())
         return false;
@@ -102,28 +122,76 @@ bool  operator==(const std::vector<T> &lhs, const std::array<T, ArraySize> &rhs)
     return true;
 }
 
-template <typename T, std::size_t ArraySize>
-bool  operator!=(const std::vector<T> &lhs, const std::array<T, ArraySize> &rhs)
+template <typename T, std::size_t Size>
+inline bool  operator!=(const std::vector<T> &lhs, const std::array<T, Size> &rhs)
 {
     return !(lhs == rhs);
 }
 }
 
-template <typename T>
-typename std::vector<T>  pop_front(const std::vector<T> &lhs, typename std::vector<T>::size_type how_many)
+template <typename T, size_t Size>
+inline std::vector<T> to_vector(const std::array<T, Size> &lhs, size_t size)
 {
-    return {lhs.begin() + how_many, lhs.end()};
+    if (lhs.empty())
+        return {};
+    return {&lhs[0], &lhs[0] + size};
 }
 
 template <typename T>
-std::vector<T> subvec(const std::vector<T> &rhs, size_t start_index, size_t how_many)
+inline std::vector<T> to_vector(T t)
 {
-    if (start_index >= rhs.size() || !how_many)
+    return std::vector<T>{t};
+}
+
+template <typename T>
+inline void pop_front(std::vector<T> &lhs, typename std::vector<T>::size_type how_many)
+{
+    lhs = {lhs.begin() + how_many, lhs.end()};
+}
+
+template <typename T>
+inline std::vector<T> subvec(const std::vector<T> &rhs, size_t start_index, size_t how_many)
+{
+    if (start_index >= rhs.size() || !how_many || start_index + how_many > rhs.size())
         return {};
-    std::vector<T> res;
-    const auto begin = rhs.begin() + start_index;
-    std::copy(begin, begin + how_many, res.begin());
+    const auto sub_begin = rhs.begin() + start_index;
+    return {sub_begin, sub_begin + how_many};
+}
+
+/// Split data to chunks with size of \p split_size
+/// Last chunk can have size less than \p split size
+template <typename T>
+inline std::vector<std::vector<T>> split(const std::vector<T> &rhs, size_t split_size)
+{
+    if (rhs.empty())
+        return {};
+    if (rhs.size() < split_size)
+        return {rhs};
+    std::vector<std::vector<T>> out;
+    for (size_t i = 0; i < rhs.size(); i += split_size) {
+        auto end = rhs.begin() + i + split_size;
+        if (end > rhs.end())
+            end = rhs.end();
+        out.emplace_back(std::vector<T>{rhs.begin() + i, end});
+    }
+    return out;
+}
+
+template <typename T>
+inline std::vector<T> reverse(const std::vector<T> &rhs)
+{
+    auto res = rhs;
+    std::reverse(res.begin(), res.end());
     return res;
+}
+
+template <typename T>
+inline int find(const std::vector<T> &rhs, T elem, size_t start_pos = 0)
+{
+    const auto it = std::find(rhs.begin() + start_pos, rhs.end(), elem);
+    if (it == rhs.end())
+        return -1;
+    return std::distance(rhs.begin(), it);
 }
 
 /// Checks if given container contains given element
@@ -132,7 +200,7 @@ std::vector<T> subvec(const std::vector<T> &rhs, size_t start_index, size_t how_
 /// @param[in]  element - thing to look for
 /// @returns    true if found, false otherwise
 template <typename T>
-bool contains(const std::vector<T> &container, const T &element)
+inline bool contains(const std::vector<T> &container, const T &element)
 {
     for (const auto &entry : container)
         if (entry == element)
@@ -145,8 +213,8 @@ bool contains(const std::vector<T> &container, const T &element)
 /// @param[in] container where look for element
 /// @param[in] key key to search  for
 /// @returns true if found, false otherwise
-template <typename T>
-bool contains_key(const std::vector<std::pair<std::string, T>> &container, const std::string &key)
+template <typename Key, typename Val>
+bool contains_key(const std::vector<std::pair<Key, Val>> &container, const Key &key)
 {
     for (const auto &entry : container)
         if (entry.first == key)
@@ -154,31 +222,48 @@ bool contains_key(const std::vector<std::pair<std::string, T>> &container, const
     return false;
 }
 
-//    /// Returns value of first element with key
-//    ///
-//    /// @param[in] container where look for element
-//    /// @param[in] key key to search  for
-//    /// @returns reference to T
-//    template <typename T>
-//    const T & get(const std::vector<std::pair<std::string, T>> &container, const std::string &key)
-//    {
-//        for (const auto &entry : container)
-//            if (entry.first == key)
-//                return entry.second;
-//    }
+/// Remove first container element with the same key
+///
+/// @param[in] container where look for element
+/// @param[in] key key to search  for
+/// @returns true if found, false otherwise
+template <typename Key, typename Val>
+bool remove_key(std::vector<std::pair<Key, Val>> &container, const Key &key)
+{
+    for (auto it = container.begin(); it < container.end(); it++) {
+        if (it->first == key) {
+            container.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+///// Returns value of first element with key
+/////
+///// @param[in] container where look for element
+///// @param[in] key key to search  for
+///// @returns reference to T
+//template <typename T>
+//const T & get(const std::vector<std::pair<std::string, T>> &container, const std::string &key)
+//{
+//    for (const auto &entry : container)
+//        if (entry.first == key)
+//            return entry.second;
+//}
 //
-//    /// Returns value of first element with key
-//    ///
-//    /// @param[in] container where look for element
-//    /// @param[in] key key to search  for
-//    /// @returns reference to T
-//    template <typename T>
-//    T & get(std::vector<std::pair<std::string, T>> &container, const std::string &key)
-//    {
-//        for (const auto &entry : container)
-//            if (entry.first == key)
-//                return entry.second;
-//    }
+///// Returns value of first element with key
+/////
+///// @param[in] container where look for element
+///// @param[in] key key to search  for
+///// @returns reference to T
+//template <typename T>
+//T & get(std::vector<std::pair<std::string, T>> &container, const std::string &key)
+//{
+//    for (const auto &entry : container)
+//        if (entry.first == key)
+//            return entry.second;
+//}
 
 /// Returns value of first element with key
 ///
@@ -187,7 +272,7 @@ bool contains_key(const std::vector<std::pair<std::string, T>> &container, const
 /// @returns pointer to T
 /// @throws std::runtime_error on key not found
 template <typename T>
-const T & get(const std::vector<std::pair<std::string, T>> &container, const std::string &key)
+inline const T & get(const std::vector<std::pair<std::string, T>> &container, const std::string &key)
 {
     for (auto it = container.begin(); it!= container.end(); ++it)
         if (it->first == key)
@@ -201,7 +286,7 @@ const T & get(const std::vector<std::pair<std::string, T>> &container, const std
 /// @param[in]  element - thing to look for
 /// @returns    true if found, false otherwise
 template <typename T>
-bool begins_with(const std::vector<T> &container, const T &element)
+inline bool begins_with(const std::vector<T> &container, const T &element)
 {
     if (container.empty())
         return false;
@@ -218,7 +303,7 @@ bool begins_with(const std::vector<T> &container, const T &element)
 /// @param[in]  elements - thing to look for
 /// @returns    true if found, false otherwise
 template <typename T>
-bool begins_with(const std::vector<T> &container, const std::vector<T> &elements)
+inline bool begins_with(const std::vector<T> &container, const std::vector<T> &elements)
 {
     if (container.size() < elements.size())
         return false;
@@ -235,8 +320,8 @@ bool begins_with(const std::vector<T> &container, const std::vector<T> &elements
 /// @param[in]  container - where look for element
 /// @param[in]  elements - thing to look for
 /// @returns    true if found, false otherwise
-template <typename T, std::size_t ArraySize>
-bool begins_with(const std::vector<T> &container, const std::array<T, ArraySize> &elements)
+template <typename T, std::size_t Size>
+inline bool begins_with(const std::vector<T> &container, const std::array<T, Size> &elements)
 {
     if (container.size() < elements.size())
         return false;
@@ -248,47 +333,55 @@ bool begins_with(const std::vector<T> &container, const std::array<T, ArraySize>
     return true;
 }
 
-namespace impl {
-
-/// Serialize numeric type as hex
-///
-/// @param[in] number Number to serialize
-/// @param[in] hex_len Length of string result
-template <typename Numeric>
-std::string number_to_hex(Numeric number, size_t hex_len = sizeof(Numeric) << 1)
-{
-    static const char *digits = "0123456789ABCDEF";
-    std::string rc(hex_len, '0');
-    for (size_t i = 0, j = (hex_len - 1) * 4 ; i < hex_len; ++i, j -= 4)
-        rc[i] = digits[(number >> j) & 0x0f];
-    return rc;
-}
-}
-
-/// Serialize std::vector<> of fundamental types
+/// Serialize std::vector<> of bytes
 ///
 /// @param[in] container vector to serialize
-/// @param[in] mode serialize as "hex" or as "dec"
-/// @param[in] separator used to separate elements of \p container
-template <typename T>
-std::string to_string(const std::vector<T> &container, const std::string &mode = "hex", const std::string &separator = ", ")
+std::string to_string_hex(const std::vector<uint8_t> &container);
+
+/// Serialize std::array<> of bytes
+///
+/// @param[in] container array to serialize
+/// @param[in] size how many bytes from array should be serialized
+template <size_t Size>
+inline std::string to_string_hex(const std::array<uint8_t, Size> &container, size_t size)
 {
-    static_assert(std::is_fundamental<T>::value, "Type needs to be a fundamental one");
     if (container.empty())
         return "";
+    if (size > Size)
+        throw std::invalid_argument("Invalid number of bytes to stringify. Max number possible " + std::to_string(Size) + ", got " + std::to_string(size));
+    return to_string_hex(std::vector<uint8_t>({&container[0], &container[0] + size}));
+}
 
-    std::string result;
-    for (const auto elem : container) {
-        if (mode == "hex")
-            result += impl::number_to_hex(elem);
-        else
-            result += std::to_string(elem);
-        result += separator;
+inline std::vector<uint8_t> from_string(const std::string &str)
+{
+    const auto str_cbegin = reinterpret_cast<const uint8_t *>(str.data());
+    return std::vector<uint8_t>(str_cbegin, str_cbegin + str.size());
+}
+
+inline std::vector<uint8_t> hexstr_to_bytes(const std::string &hex_str)
+{
+    if (hex_str.empty() || hex_str.size() % 2)
+        throw std::invalid_argument("Invalid size of hex string");
+
+    std::vector<uint8_t> res{};
+    res.reserve(hex_str.size() / 2);
+    for (unsigned int i = 0; i < hex_str.length(); i += 2) {
+        const auto a_byte = std::stoul(hex_str.substr(i, 2), nullptr, 16);
+        res.push_back(static_cast<uint8_t>(a_byte));
     }
-    // last separator should be removed
-    result.resize(result.size() - separator.size());
+    return res;
+}
 
-    return result;
+inline std::vector<uint8_t> string_to_bytes(const std::string &str)
+{
+    const auto str_data = reinterpret_cast<const uint8_t *>(str.data());
+    return std::vector<uint8_t>(str_data, str_data + str.size());
+}
+
+inline std::string bytes_to_string(const std::vector<uint8_t> &v)
+{
+    const auto v_data = reinterpret_cast<const char *>(v.data());
+    return std::string(v_data, v_data + v.size());
 }
 }
 
